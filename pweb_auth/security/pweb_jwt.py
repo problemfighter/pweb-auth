@@ -30,6 +30,15 @@ class PWebJWT:
         except:
             return None
 
+    def decode_token(self, token: str, check_signature: bool = True):
+        try:
+            if not token:
+                return None
+            options = {"verify_signature": check_signature}
+            return jwt.decode(token, PWebAuthConfig.JWT_SECRET, algorithms=[self.ALGORITHMS], options=options)
+        except:
+            return None
+
     def get_access_token_validity(self, minutes=None):
         if not minutes:
             minutes = PWebAuthConfig.JWT_ACCESS_TOKEN_VALIDITY_MIN
