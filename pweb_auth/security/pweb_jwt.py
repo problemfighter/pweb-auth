@@ -1,5 +1,6 @@
 import datetime
 import jwt
+from pweb.system12.pweb_saas_registry import PWebSaaSRegistry
 from pweb_auth.common.pweb_auth_config import PWebAuthConfig
 
 
@@ -12,7 +13,7 @@ class PWebJWT:
         payload["exp"] = exp
         if iss:
             payload["iss"] = iss
-        return jwt.encode(payload, PWebAuthConfig.JWT_SECRET, algorithm=self.ALGORITHMS)
+        return jwt.encode(payload, PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET), algorithm=self.ALGORITHMS)
 
     def get_access_token(self, payload: dict = None, iss=None):
         validity = self.get_access_token_validity()
@@ -26,7 +27,7 @@ class PWebJWT:
         try:
             if not token:
                 return None
-            return jwt.decode(token, PWebAuthConfig.JWT_SECRET, algorithms=[self.ALGORITHMS])
+            return jwt.decode(token, PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET), algorithms=[self.ALGORITHMS])
         except:
             return None
 
@@ -35,18 +36,18 @@ class PWebJWT:
             if not token:
                 return None
             options = {"verify_signature": check_signature}
-            return jwt.decode(token, PWebAuthConfig.JWT_SECRET, algorithms=[self.ALGORITHMS], options=options)
+            return jwt.decode(token, PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET), algorithms=[self.ALGORITHMS], options=options)
         except:
             return None
 
     def get_access_token_validity(self, minutes=None):
         if not minutes:
-            minutes = PWebAuthConfig.JWT_ACCESS_TOKEN_VALIDITY_MIN
+            minutes = PWebSaaSRegistry.get_saas_config(config_key="JWT_ACCESS_TOKEN_VALIDITY_MIN", default=PWebAuthConfig.JWT_ACCESS_TOKEN_VALIDITY_MIN)
         return self.get_token_validity(minutes)
 
     def get_refresh_token_validity(self, minutes=None):
         if not minutes:
-            minutes = PWebAuthConfig.JWT_REFRESH_TOKEN_VALIDITY_MIN
+            minutes = PWebSaaSRegistry.get_saas_config(config_key="JWT_REFRESH_TOKEN_VALIDITY_MIN", default=PWebAuthConfig.JWT_REFRESH_TOKEN_VALIDITY_MIN)
         return self.get_token_validity(minutes)
 
     def get_token_validity(self, minutes):
