@@ -63,7 +63,7 @@ class OperatorAPIService:
         payload[self.TOKEN] = db_token.token
         return self.pweb_jwt.get_refresh_token(payload, iss=operator.uuid)
 
-    def process_login_response(self, operator, code: str = PWebResponseCode.success):
+    def process_login_data(self, operator, response_dto=None):
         token = {
             "accessToken": self.get_access_token(operator_id=operator.id),
             "refreshToken": self.get_refresh_token(operator_id=operator.id)
@@ -72,13 +72,20 @@ class OperatorAPIService:
             "operator": operator,
             "token": token
         }
-        response_dict = PWebAuthConfig.LOGIN_RESPONSE_DTO().dump(response)
+        if response_dto:
+            response_dict = response_dto.dump(response)
+        else:
+            response_dict = PWebAuthConfig.LOGIN_RESPONSE_DTO().dump(response)
 
         on_token_generation = PWebAuthUtil.on_token_generation()
         if on_token_generation:
             response = on_token_generation.perform(response=response_dict, operator=operator)
             if response:
                 return response
+        return response_dict
+
+    def process_login_response(self, operator, code: str = PWebResponseCode.success):
+        response_dict = self.process_login_data(operator=operator)
         return self.rest_data_crud.response_maker.dictionary_object_response(data=response_dict, code=code)
 
     def login(self):
