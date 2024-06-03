@@ -8,6 +8,8 @@ from pweb_auth.security.pweb_jwt import PWebJWT
 from pweb_auth.service.operator_service import OperatorService
 from pweb_form_rest import RESTDataCRUD, form_rest_exception
 from pweb_form_rest.data.pweb_response_status import PWebResponseCode
+from pweb_orm import PWebSaaS
+from pweb_orm.orm.pweb_saas import PWebSaaSConst
 
 
 class OperatorAPIService:
@@ -31,6 +33,9 @@ class OperatorAPIService:
         if not payload:
             payload = {}
         payload[self.OPERATOR] = operator.id
+        tkey = PWebSaaS.get_tenant_key()
+        if tkey:
+            payload[PWebSaaSConst.TENANT_KEY] = tkey
         return self.pweb_jwt.get_access_token(payload, iss=operator.uuid)
 
     def create_or_update_db_refresh_token(self, operator_id, uuid=None):
