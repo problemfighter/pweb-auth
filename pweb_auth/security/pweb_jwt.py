@@ -32,7 +32,8 @@ class PWebJWT:
             if not secret:
                 secret = PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET)
             return jwt.decode(token, secret, algorithms=[self.ALGORITHMS])
-        except:
+        except Exception as e:
+            print(e)
             return None
 
     def decode_token(self, token: str, check_signature: bool = True):
