@@ -7,13 +7,15 @@ from pweb_auth.common.pweb_auth_config import PWebAuthConfig
 class PWebJWT:
     ALGORITHMS: str = "HS256"
 
-    def get_token(self, exp: datetime, payload: dict = None, iss=None):
+    def get_token(self, exp: datetime, payload: dict = None, iss=None, secret=None):
         if not payload:
             payload = {}
         payload["exp"] = exp
         if iss:
             payload["iss"] = iss
-        return jwt.encode(payload, PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET), algorithm=self.ALGORITHMS)
+        if not secret:
+            secret = PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET)
+        return jwt.encode(payload, secret, algorithm=self.ALGORITHMS)
 
     def get_access_token(self, payload: dict = None, iss=None):
         validity = self.get_access_token_validity()
@@ -23,11 +25,13 @@ class PWebJWT:
         validity = self.get_refresh_token_validity()
         return self.get_token(validity, payload=payload, iss=iss)
 
-    def validate_token(self, token: str):
+    def validate_token(self, token: str, secret=None):
         try:
             if not token:
                 return None
-            return jwt.decode(token, PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET), algorithms=[self.ALGORITHMS])
+            if not secret:
+                secret = PWebSaaSRegistry.get_saas_config(config_key="JWT_SECRET", default=PWebAuthConfig.JWT_SECRET)
+            return jwt.decode(token, secret, algorithms=[self.ALGORITHMS])
         except:
             return None
 
