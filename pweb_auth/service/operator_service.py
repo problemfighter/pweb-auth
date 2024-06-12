@@ -51,6 +51,8 @@ class OperatorService:
     def get_operator_by_token(self, token):
         return AuthModel.operator.query.filter(AuthModel.operator.token == token, AuthModel.operator.isDeleted == False).first()
 
+    def get_operator_by_uuid(self, uuid):
+        return AuthModel.operator.query.filter(AuthModel.operator.uuid == uuid, AuthModel.operator.isDeleted == False).first()
 
     def get_operator_by_dict_data(self, dict_data: dict):
         auth_base = PWebAuthConfig.SYSTEM_AUTH_BASE
