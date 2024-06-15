@@ -61,6 +61,9 @@ class OperatorAPIService:
         if not db_token:
             return None
         payload[self.TOKEN] = db_token.token
+        tkey = PWebSaaS.get_tenant_key()
+        if tkey:
+            payload[PWebSaaSConst.TENANT_KEY] = tkey
         return self.pweb_jwt.get_refresh_token(payload, iss=operator.uuid)
 
     def process_login_data(self, operator, response_dto=None):
